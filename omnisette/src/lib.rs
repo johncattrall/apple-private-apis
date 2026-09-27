@@ -47,6 +47,9 @@ pub enum AnisetteError {
     #[error("Request Error {0}")]
     ReqwestError(#[from] reqwest::Error),
     #[cfg(feature = "remote-anisette-v3")]
+    #[error("Remote anisette service rejected the header request")]
+    RemoteHeaderError,
+    #[cfg(feature = "remote-anisette-v3")]
     #[error("Provisioning socket error {0}")]
     WsError(#[from] tokio_tungstenite::tungstenite::error::Error),
     #[cfg(feature = "remote-anisette-v3")]

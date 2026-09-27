@@ -231,13 +231,14 @@ impl AnisetteClient {
         let headers = http_client.post(path)
             .json(&body)
             .send().await?
+            .error_for_status()?
             .json::<AnisetteHeaders>().await?;
         match headers {
             AnisetteHeaders::GetHeadersError { message } => {
                 if message.contains("-45061") {
                     Err(AnisetteError::AnisetteNotProvisioned)
                 } else {
-                    panic!("Unknown error {}", message)
+                    Err(AnisetteError::RemoteHeaderError)
                 }
             },
             AnisetteHeaders::Headers { machine_id, one_time_password, routing_info } => {
@@ -414,7 +415,7 @@ impl AnisetteProvider for RemoteAnisetteProviderV3 {
                     client.provision(state).await?;
                     plist::to_file_xml(config_path, state)?;
                     client.get_headers(&state).await?
-                } else { panic!() }
+                } else { return Err(err); }
             },
         };
         Ok(data.get_headers())
